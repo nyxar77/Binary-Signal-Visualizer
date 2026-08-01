@@ -37,7 +37,7 @@ h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: .98; letter-
 .theme-card-header h2 { margin: 0; font-size: 1.05rem; }
 .theme-card-header p { margin: .3rem 0 0; color: var(--muted); font-size: .78rem; }
 .theme-card-header strong { color: var(--accent); font-size: .78rem; white-space: nowrap; }
-input { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; outline: none; }
+input, select { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; outline: none; }
 input { padding: 1rem 1.1rem; font: 500 1.2rem "DM Mono", monospace; letter-spacing: .08em; }
 input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .card { margin-bottom: 1rem; padding: 1.5rem; border: 1px solid var(--border); border-radius: 18px; background: color-mix(in srgb, var(--surface) 88%, transparent); box-shadow: var(--shadow); }
@@ -49,6 +49,11 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px v
 .accent-swatches button { width: 1.8rem; height: 1.8rem; padding: 0; border: 2px solid transparent; border-radius: 50%; background: var(--swatch); cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .accent-swatches button:hover, .accent-swatches button.active { border-color: var(--text); outline: 2px solid var(--accent); outline-offset: 2px; }
 .card h2, .card h3 { margin: 0 0 .9rem; font-size: 1rem; }
+.encoding-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: .9rem; }
+.encoding-heading h2 { margin: 0; }
+.convention-control { display: grid; gap: .25rem; min-width: 190px; color: var(--muted); font-size: .7rem; font-weight: 700; }
+.convention-control select { padding: .5rem .65rem; font-size: .78rem; cursor: pointer; }
+.standard-note { color: var(--muted); font-size: .72rem; white-space: nowrap; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .7rem; }
 .input-section label { display: block; font-weight: 700; }
 .quiet-button { padding: .45rem .7rem; color: var(--muted); font-size: .72rem; }
@@ -62,5 +67,5 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px v
 #legend { line-height: 1.65; }
 .chart-section { padding: 1rem; }
 #signal-chart { display: block; width: 100% !important; height: min(48vw, 360px) !important; }
-@media (max-width: 760px) { .container { padding: 2.2rem 0; } .header { align-items: stretch; flex-direction: column; } .theme-control { align-self: flex-start; } .theme-popover { left: 0; right: auto; width: min(650px, calc(100vw - 2rem)); } .theme-card-header { flex-direction: column; } .encoding-buttons { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) { .container { padding: 2.2rem 0; } .header { align-items: stretch; flex-direction: column; } .theme-control { align-self: flex-start; } .theme-popover { left: 0; right: auto; width: min(650px, calc(100vw - 2rem)); } .theme-card-header { flex-direction: column; } .encoding-heading { align-items: stretch; flex-direction: column; } .convention-control { min-width: 0; } .standard-note { white-space: normal; } .encoding-buttons { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 420px) { .container { width: min(100% - 1rem, 1120px); } .card { padding: 1rem; } .encoding-buttons { grid-template-columns: repeat(2, 1fr); } }

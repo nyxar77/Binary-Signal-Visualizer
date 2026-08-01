@@ -8,6 +8,7 @@ import {
 type EncodingName = "unipolar" | "unipolar-rz" | "nrz-l" | "nrz-i" | "polar-rz" | "manchester" | "differential-manchester" | "bipolar-ami" | "b8zs" | "hdb3";
 type ThemeName = "system" | "latte" | "frappe" | "macchiato" | "mocha";
 type Level = -1 | 0 | 1;
+type ConventionName = "thomas" | "ieee8023" | "biphase-s" | "biphase-m";
 
 const input = document.querySelector<HTMLInputElement>("#binary-input")!;
 const error = document.querySelector<HTMLDivElement>("#input-error")!;
@@ -24,8 +25,11 @@ const themeDot = document.querySelector<HTMLElement>("#theme-dot")!;
 const shareButton = document.querySelector<HTMLButtonElement>("#share-button")!;
 const shareStatus = document.querySelector<HTMLDivElement>("#share-status")!;
 const canvas = document.querySelector<HTMLCanvasElement>("#signal-chart")!;
+const conventionControl = document.querySelector<HTMLLabelElement>("#convention-control")!;
+const conventionSelect = document.querySelector<HTMLSelectElement>("#convention-select")!;
+const standardNote = document.querySelector<HTMLSpanElement>("#standard-note")!;
 
-if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !themeControl || !themeButton || !themePopover || !themeButtonLabel || !themeDot || !shareButton || !shareStatus || !canvas) {
+if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !themeControl || !themeButton || !themePopover || !themeButtonLabel || !themeDot || !shareButton || !shareStatus || !conventionControl || !conventionSelect || !standardNote || !canvas) {
   throw new Error("Visualizer markup is incomplete.");
 }
 
@@ -35,8 +39,8 @@ const legends: Record<EncodingName, string> = {
   "nrz-l": "1 is −V and 0 is +V. The level stays constant for the bit.",
   "nrz-i": "A 1 changes the level at the start of the bit; a 0 leaves it unchanged.",
   "polar-rz": "1 is +V for the first half and 0 is −V for the first half; both return to 0V.",
-  manchester: "1 transitions high → low; 0 transitions low → high at mid-bit.",
-  "differential-manchester": "There is always a mid-bit transition. A 0 also transitions at the start; a 1 does not.",
+  manchester: "1 transitions high → low; 0 transitions low → high at mid-bit. The convention can be inverted.",
+  "differential-manchester": "There is always a mid-bit transition. The convention controls which bit adds the boundary transition.",
   "bipolar-ami": "0 is 0V. Each 1 alternates between +V and −V.",
   b8zs: "Bipolar AMI with every run of eight zeroes replaced by 000V B0V B.",
   hdb3: "Bipolar AMI with every run of four zeroes replaced by 000V or B00V.",
@@ -115,11 +119,15 @@ const encoders: Record<EncodingName, (bits: string) => Level[]> = {
     }));
   },
   "polar-rz": (bits) => bits.split("").flatMap((bit) => bit === "1" ? [1, 0] : [-1, 0]) as Level[],
-  manchester: (bits) => bits.split("").flatMap((bit) => bit === "1" ? [1, -1] : [-1, 1]) as Level[],
+  manchester: (bits) => bits.split("").flatMap((bit) => {
+    const one = currentConvention === "ieee8023" ? [-1, 1] : [1, -1];
+    return bit === "1" ? one : [one[1], one[0]];
+  }) as Level[],
   "differential-manchester": (bits) => {
     let level: Level = 1;
     return bits.split("").flatMap((bit) => {
-      if (bit === "0") level = (level * -1) as Level;
+      const boundaryTransition = currentConvention === "biphase-m" ? bit === "1" : bit === "0";
+      if (boundaryTransition) level = (level * -1) as Level;
       const firstHalf = level;
       level = (level * -1) as Level;
       return [firstHalf, level];
@@ -131,6 +139,7 @@ const encoders: Record<EncodingName, (bits: string) => Level[]> = {
 };
 
 let currentEncoding: EncodingName = "nrz-l";
+let currentConvention: ConventionName = "thomas";
 let chart: Chart | undefined;
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 const palettes = {
@@ -139,6 +148,14 @@ const palettes = {
   macchiato: [["Rosewater", "#f4dbd6"], ["Flamingo", "#f0c6c6"], ["Pink", "#f5bde6"], ["Mauve", "#c6a0f6"], ["Red", "#ed8796"], ["Peach", "#f5a97f"], ["Yellow", "#eed49f"], ["Green", "#a6da95"], ["Teal", "#8bd5ca"], ["Sky", "#91d7e3"], ["Sapphire", "#7dc4e4"], ["Blue", "#8aadf4"]],
   mocha: [["Rosewater", "#f5e0e6"], ["Flamingo", "#f2cdcd"], ["Pink", "#f5c2e7"], ["Mauve", "#cba6f7"], ["Red", "#f38ba8"], ["Peach", "#fab387"], ["Yellow", "#f9e2af"], ["Green", "#a6e3a1"], ["Teal", "#94e2d5"], ["Sky", "#89dceb"], ["Sapphire", "#74c7ec"], ["Blue", "#89b4fa"]],
 } as const;
+const conventionOptions: Partial<Record<EncodingName, readonly (readonly [ConventionName, string])[]>> = {
+  manchester: [["thomas", "G.E. Thomas"], ["ieee8023", "IEEE 802.3"]],
+  "differential-manchester": [["biphase-s", "Biphase-S · 0 transition"], ["biphase-m", "Biphase-M · 1 transition"]],
+};
+const fixedStandards: Partial<Record<EncodingName, string>> = {
+  b8zs: "ANSI T1 / North America",
+  hdb3: "ITU-T G.703 / E1",
+};
 let currentFlavour: ThemeName = "system";
 let currentAccent = "Mauve";
 
@@ -198,9 +215,24 @@ function renderAccentSwatches(accents: readonly (readonly [string, string])[]): 
   }));
 }
 
+function renderConventionControl(): void {
+  const options = conventionOptions[currentEncoding] ?? [];
+  conventionControl.hidden = options.length === 0;
+  standardNote.textContent = fixedStandards[currentEncoding] ?? "";
+  conventionSelect.replaceChildren(...options.map(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    option.selected = value === currentConvention;
+    return option;
+  }));
+  conventionSelect.value = currentConvention;
+}
+
 function render(): void {
   theme();
   const bits = input.value.trim();
+  renderConventionControl();
   document.querySelectorAll<HTMLButtonElement>("#encoding-buttons button").forEach((button) => {
     button.classList.toggle("active", button.dataset.encoding === currentEncoding);
   });
@@ -244,7 +276,16 @@ function render(): void {
 input.addEventListener("input", render);
 encodingButtons.addEventListener("click", (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-encoding]");
-  if (button) { currentEncoding = button.dataset.encoding as EncodingName; render(); }
+  if (button) {
+    currentEncoding = button.dataset.encoding as EncodingName;
+    currentConvention = currentEncoding === "differential-manchester" ? "biphase-s" : currentEncoding === "manchester" ? "thomas" : currentConvention;
+    render();
+  }
+});
+conventionSelect.addEventListener("change", () => {
+  currentConvention = conventionSelect.value as ConventionName;
+  localStorage.setItem("binary-viz-convention", currentConvention);
+  render();
 });
 flavourButtons.addEventListener("click", (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-flavour]");
@@ -279,6 +320,7 @@ if (sharedEncoding && sharedEncoding in encoders) currentEncoding = sharedEncodi
 const savedTheme = JSON.parse(localStorage.getItem("binary-viz-theme") ?? "null") as { flavour?: ThemeName; accent?: string } | null;
 currentFlavour = savedTheme?.flavour ?? "system";
 currentAccent = savedTheme?.accent ?? "Mauve";
+currentConvention = (localStorage.getItem("binary-viz-convention") as ConventionName | null) ?? "thomas";
 function saveTheme(): void {
   localStorage.setItem("binary-viz-theme", JSON.stringify({ flavour: currentFlavour, accent: currentAccent }));
 }

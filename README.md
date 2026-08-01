@@ -6,6 +6,8 @@ Enter a binary sequence and inspect common Unipolar, Polar, Manchester, Bipolar,
 
 - TypeScript frontend with a reproducible Vite build.
 - Common classroom encodings: NRZ, RZ, Manchester, Differential Manchester, and AMI.
+- Manchester and Differential Manchester conventions can be switched from the encoding panel.
+- B8ZS is labelled as the ANSI T1 / North-American convention; HDB3 is labelled as ITU-T G.703 / E1.
 - Correct AMI substitutions for B8ZS and HDB3.
 - Catppuccin Latte, Frappé, Macchiato, and Mocha palettes.
 - `Default · browser` follows `prefers-color-scheme`: Latte for light mode and Mocha for dark mode.
