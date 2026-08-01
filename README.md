@@ -2,6 +2,8 @@
 
 Enter a binary sequence and inspect common Unipolar, Polar, Manchester, Bipolar, B8ZS, or HDB3 waveforms.
 
+![Binary Signal Visualizer](image.png)
+
 ## Features
 
 - TypeScript frontend with a reproducible Vite build.
