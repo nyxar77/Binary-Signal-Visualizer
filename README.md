@@ -1,6 +1,6 @@
 # Binary Signal Visualizer
 
-An interactive line-encoding visualizer for digital communications. Enter a binary sequence and inspect its Unipolar, NRZ-L, NRZ-I, Manchester, B8ZS, or HDB3 waveform.
+Enter a binary sequence and inspect its Unipolar, NRZ-L, NRZ-I, Manchester, B8ZS, or HDB3 waveform.
 
 ## Features
 
