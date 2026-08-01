@@ -17,23 +17,25 @@
         </div>
       </header>
 
-      <section class="theme-card" aria-labelledby="theme-heading">
-        <div class="theme-card-header">
+      <details class="theme-card">
+        <summary class="theme-card-header">
           <div>
-            <h2 id="theme-heading">Visualizer theme</h2>
-            <p>Choose Default, a Catppuccin flavour, or an accent.</p>
+            <h2 id="theme-heading">Appearance</h2>
+            <p>Choose a Catppuccin flavour or accent.</p>
           </div>
           <strong id="active-theme">Mocha · Mauve</strong>
+        </summary>
+        <div class="theme-controls">
+          <div class="flavour-buttons" id="flavour-buttons" aria-label="Theme flavour">
+            <button type="button" data-flavour="system" aria-pressed="false">Default</button>
+            <button type="button" data-flavour="latte" aria-pressed="false">Latte</button>
+            <button type="button" data-flavour="frappe" aria-pressed="false">Frappé</button>
+            <button type="button" data-flavour="macchiato" aria-pressed="false">Macchiato</button>
+            <button type="button" data-flavour="mocha" aria-pressed="false">Mocha</button>
+          </div>
+          <div class="accent-swatches" id="accent-swatches" aria-label="Theme accent"></div>
         </div>
-        <div class="flavour-buttons" id="flavour-buttons" aria-label="Theme flavour">
-          <button type="button" data-flavour="system" aria-pressed="false">Default</button>
-          <button type="button" data-flavour="latte" aria-pressed="false">Latte</button>
-          <button type="button" data-flavour="frappe" aria-pressed="false">Frappé</button>
-          <button type="button" data-flavour="macchiato" aria-pressed="false">Macchiato</button>
-          <button type="button" data-flavour="mocha" aria-pressed="false">Mocha</button>
-        </div>
-        <div class="accent-swatches" id="accent-swatches" aria-label="Theme accent"></div>
-      </section>
+      </details>
 
       <!-- Input Section -->
       <section class="card input-section">
