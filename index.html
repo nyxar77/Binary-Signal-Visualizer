@@ -72,16 +72,36 @@
           </label>
         </div>
         <div class="encoding-buttons" id="encoding-buttons">
-          <button data-encoding="unipolar">Unipolar</button>
-          <button data-encoding="unipolar-rz">Unipolar RZ</button>
-          <button data-encoding="nrz-l">NRZ-L</button>
-          <button data-encoding="nrz-i">NRZ-I</button>
-          <button data-encoding="polar-rz">Polar RZ</button>
-          <button data-encoding="manchester">Manchester</button>
-          <button data-encoding="differential-manchester">Diff. Manchester</button>
-          <button data-encoding="bipolar-ami">Bipolar AMI</button>
-          <button data-encoding="b8zs">B8ZS</button>
-          <button data-encoding="hdb3">HDB3</button>
+          <section class="encoding-group">
+            <h3>NRZ</h3>
+            <div class="encoding-group-buttons">
+              <button data-encoding="unipolar">Unipolar</button>
+              <button data-encoding="nrz-l">NRZ-L</button>
+              <button data-encoding="nrz-i">NRZ-I</button>
+            </div>
+          </section>
+          <section class="encoding-group">
+            <h3>RZ</h3>
+            <div class="encoding-group-buttons">
+              <button data-encoding="unipolar-rz">Unipolar RZ</button>
+              <button data-encoding="polar-rz">Polar RZ</button>
+            </div>
+          </section>
+          <section class="encoding-group">
+            <h3>Manchester</h3>
+            <div class="encoding-group-buttons">
+              <button data-encoding="manchester">Manchester</button>
+              <button data-encoding="differential-manchester">Diff. Manchester</button>
+            </div>
+          </section>
+          <section class="encoding-group">
+            <h3>Bipolar</h3>
+            <div class="encoding-group-buttons">
+              <button data-encoding="bipolar-ami">AMI</button>
+              <button data-encoding="b8zs">B8ZS</button>
+              <button data-encoding="hdb3">HDB3</button>
+            </div>
+          </section>
         </div>
       </section>
 
