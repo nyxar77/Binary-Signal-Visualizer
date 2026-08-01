@@ -5,7 +5,7 @@ import {
   type Plugin,
 } from "chart.js/auto";
 
-type EncodingName = "unipolar" | "nrz-l" | "nrz-i" | "manchester" | "b8zs" | "hdb3";
+type EncodingName = "unipolar" | "unipolar-rz" | "nrz-l" | "nrz-i" | "polar-rz" | "manchester" | "differential-manchester" | "bipolar-ami" | "b8zs" | "hdb3";
 type ThemeName = "system" | "latte" | "frappe" | "macchiato" | "mocha";
 type Level = -1 | 0 | 1;
 
@@ -30,10 +30,14 @@ if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accen
 }
 
 const legends: Record<EncodingName, string> = {
-  unipolar: "1 is +V and 0 is 0V.",
+  unipolar: "1 is +V and 0 is 0V. The level stays constant for the bit.",
+  "unipolar-rz": "1 is +V for the first half, then returns to 0V; 0 stays at 0V.",
   "nrz-l": "1 is −V and 0 is +V. The level stays constant for the bit.",
   "nrz-i": "A 1 changes the level at the start of the bit; a 0 leaves it unchanged.",
+  "polar-rz": "1 is +V for the first half and 0 is −V for the first half; both return to 0V.",
   manchester: "1 transitions high → low; 0 transitions low → high at mid-bit.",
+  "differential-manchester": "There is always a mid-bit transition. A 0 also transitions at the start; a 1 does not.",
+  "bipolar-ami": "0 is 0V. Each 1 alternates between +V and −V.",
   b8zs: "Bipolar AMI with every run of eight zeroes replaced by 000V B0V B.",
   hdb3: "Bipolar AMI with every run of four zeroes replaced by 000V or B00V.",
 };
@@ -101,6 +105,7 @@ function hdb3(bits: string): Level[] {
 
 const encoders: Record<EncodingName, (bits: string) => Level[]> = {
   unipolar: (bits) => repeat([...bits].map((bit) => (bit === "1" ? 1 : 0))),
+  "unipolar-rz": (bits) => bits.split("").flatMap((bit) => bit === "1" ? [1, 0] : [0, 0]) as Level[],
   "nrz-l": (bits) => repeat([...bits].map((bit) => (bit === "1" ? -1 : 1))),
   "nrz-i": (bits) => {
     let level: Level = 1;
@@ -109,7 +114,18 @@ const encoders: Record<EncodingName, (bits: string) => Level[]> = {
       return level;
     }));
   },
+  "polar-rz": (bits) => bits.split("").flatMap((bit) => bit === "1" ? [1, 0] : [-1, 0]) as Level[],
   manchester: (bits) => bits.split("").flatMap((bit) => bit === "1" ? [1, -1] : [-1, 1]) as Level[],
+  "differential-manchester": (bits) => {
+    let level: Level = 1;
+    return bits.split("").flatMap((bit) => {
+      if (bit === "0") level = (level * -1) as Level;
+      const firstHalf = level;
+      level = (level * -1) as Level;
+      return [firstHalf, level];
+    }) as Level[];
+  },
+  "bipolar-ami": ami,
   b8zs,
   hdb3,
 };

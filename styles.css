@@ -54,7 +54,7 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px v
 .quiet-button { padding: .45rem .7rem; color: var(--muted); font-size: .72rem; }
 .error { min-height: 1.4em; margin: .55rem 0 0; color: var(--danger); font-size: .85rem; }
 .status { min-height: 1.2em; margin-top: .35rem; color: var(--accent); font-size: .75rem; }
-.encoding-buttons { display: grid; grid-template-columns: repeat(6, 1fr); gap: .65rem; }
+.encoding-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: .65rem; }
 .encoding-buttons button { padding: .85rem .6rem; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; font: 600 .85rem inherit; transition: .2s; }
 .encoding-buttons button:hover, .encoding-buttons button.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); transform: translateY(-2px); }
 .legend-section { color: var(--muted); }
