@@ -15,31 +15,40 @@
           <h1>Binary Signal Visualizer</h1>
           <p class="subtitle">See every bit become a physical signal.</p>
         </div>
-      </header>
-
-      <details class="theme-card">
-        <summary class="theme-card-header">
-          <div>
-            <h2 id="theme-heading">Appearance</h2>
-            <p>Choose a Catppuccin flavour or accent.</p>
+        <div class="theme-control" id="theme-control">
+          <button class="theme-button" id="theme-button" type="button" aria-expanded="false" aria-controls="theme-popover">
+            <span class="theme-dot" id="theme-dot" aria-hidden="true"></span>
+            <span>Theme</span>
+            <strong id="theme-button-label">Mocha</strong>
+          </button>
+          <div class="theme-popover" id="theme-popover" hidden>
+            <div class="theme-card-header">
+              <div>
+                <h2 id="theme-heading">Appearance</h2>
+                <p>Choose a Catppuccin flavour or accent.</p>
+              </div>
+              <strong id="active-theme">Mocha · Mauve</strong>
+            </div>
+            <div class="theme-controls">
+              <div class="flavour-buttons" id="flavour-buttons" aria-label="Theme flavour">
+                <button type="button" data-flavour="system" aria-pressed="false">Default</button>
+                <button type="button" data-flavour="latte" aria-pressed="false">Latte</button>
+                <button type="button" data-flavour="frappe" aria-pressed="false">Frappé</button>
+                <button type="button" data-flavour="macchiato" aria-pressed="false">Macchiato</button>
+                <button type="button" data-flavour="mocha" aria-pressed="false">Mocha</button>
+              </div>
+              <div class="accent-swatches" id="accent-swatches" aria-label="Theme accent"></div>
+            </div>
           </div>
-          <strong id="active-theme">Mocha · Mauve</strong>
-        </summary>
-        <div class="theme-controls">
-          <div class="flavour-buttons" id="flavour-buttons" aria-label="Theme flavour">
-            <button type="button" data-flavour="system" aria-pressed="false">Default</button>
-            <button type="button" data-flavour="latte" aria-pressed="false">Latte</button>
-            <button type="button" data-flavour="frappe" aria-pressed="false">Frappé</button>
-            <button type="button" data-flavour="macchiato" aria-pressed="false">Macchiato</button>
-            <button type="button" data-flavour="mocha" aria-pressed="false">Mocha</button>
-          </div>
-          <div class="accent-swatches" id="accent-swatches" aria-label="Theme accent"></div>
         </div>
-      </details>
+      </header>
 
       <!-- Input Section -->
       <section class="card input-section">
-        <label for="binary-input">Binary sequence</label>
+        <div class="section-heading">
+          <label for="binary-input">Binary sequence</label>
+          <button class="quiet-button" id="share-button" type="button">Copy link</button>
+        </div>
         <input
           type="text"
           id="binary-input"
@@ -47,6 +56,7 @@
           maxlength="64"
         />
         <div id="input-error" class="error"></div>
+        <div class="status" id="share-status" role="status" aria-live="polite"></div>
       </section>
 
       <!-- Encoding Selection -->

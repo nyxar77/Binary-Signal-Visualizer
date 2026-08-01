@@ -16,9 +16,16 @@ const legend = document.querySelector<HTMLDivElement>("#legend")!;
 const flavourButtons = document.querySelector<HTMLDivElement>("#flavour-buttons")!;
 const accentSwatches = document.querySelector<HTMLDivElement>("#accent-swatches")!;
 const activeTheme = document.querySelector<HTMLElement>("#active-theme")!;
+const themeControl = document.querySelector<HTMLDivElement>("#theme-control")!;
+const themeButton = document.querySelector<HTMLButtonElement>("#theme-button")!;
+const themePopover = document.querySelector<HTMLDivElement>("#theme-popover")!;
+const themeButtonLabel = document.querySelector<HTMLElement>("#theme-button-label")!;
+const themeDot = document.querySelector<HTMLElement>("#theme-dot")!;
+const shareButton = document.querySelector<HTMLButtonElement>("#share-button")!;
+const shareStatus = document.querySelector<HTMLDivElement>("#share-status")!;
 const canvas = document.querySelector<HTMLCanvasElement>("#signal-chart")!;
 
-if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !canvas) {
+if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !themeControl || !themeButton || !themePopover || !themeButtonLabel || !themeDot || !shareButton || !shareStatus || !canvas) {
   throw new Error("Visualizer markup is incomplete.");
 }
 
@@ -152,7 +159,10 @@ function theme(): void {
   const accents = palettes[resolved];
   const accent = accents.find(([name]) => name === currentAccent)?.[1] ?? accents[3][1];
   document.body.style.setProperty("--accent", accent);
-  activeTheme.textContent = `${resolved[0].toUpperCase()}${resolved.slice(1)} · ${currentAccent}`;
+  const resolvedLabel = `${resolved[0].toUpperCase()}${resolved.slice(1)}`;
+  activeTheme.textContent = `${resolvedLabel} · ${currentAccent}`;
+  themeButtonLabel.textContent = resolvedLabel;
+  themeDot.style.backgroundColor = accent;
   flavourButtons.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.flavour === currentFlavour));
   });
@@ -222,18 +232,49 @@ encodingButtons.addEventListener("click", (event) => {
 });
 flavourButtons.addEventListener("click", (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-flavour]");
-  if (button) { currentFlavour = button.dataset.flavour as ThemeName; render(); saveTheme(); }
+  if (button) { currentFlavour = button.dataset.flavour as ThemeName; render(); saveTheme(); closeThemePopover(); }
 });
 accentSwatches.addEventListener("click", (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-accent]");
-  if (button) { currentAccent = button.dataset.accent ?? "Mauve"; render(); saveTheme(); }
+  if (button) { currentAccent = button.dataset.accent ?? "Mauve"; render(); saveTheme(); closeThemePopover(); }
 });
 prefersDark.addEventListener("change", () => { if (currentFlavour === "system") render(); });
-input.value = "10101";
+function closeThemePopover(): void {
+  themePopover.hidden = true;
+  themeButton.setAttribute("aria-expanded", "false");
+}
+
+themeButton.addEventListener("click", () => {
+  const isOpen = !themePopover.hidden;
+  themePopover.hidden = isOpen;
+  themeButton.setAttribute("aria-expanded", String(!isOpen));
+});
+document.addEventListener("pointerdown", (event) => {
+  if (!themeControl.contains(event.target as Node)) closeThemePopover();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeThemePopover();
+});
+
+const url = new URL(window.location.href);
+const sharedEncoding = url.searchParams.get("encoding") as EncodingName | null;
+input.value = url.searchParams.get("bits") ?? "10101";
+if (sharedEncoding && sharedEncoding in encoders) currentEncoding = sharedEncoding;
 const savedTheme = JSON.parse(localStorage.getItem("binary-viz-theme") ?? "null") as { flavour?: ThemeName; accent?: string } | null;
 currentFlavour = savedTheme?.flavour ?? "system";
 currentAccent = savedTheme?.accent ?? "Mauve";
 function saveTheme(): void {
   localStorage.setItem("binary-viz-theme", JSON.stringify({ flavour: currentFlavour, accent: currentAccent }));
 }
+shareButton.addEventListener("click", async () => {
+  const shareUrl = new URL(window.location.href);
+  shareUrl.search = new URLSearchParams({ bits: input.value.trim(), encoding: currentEncoding }).toString();
+  try {
+    await navigator.clipboard.writeText(shareUrl.toString());
+    shareStatus.textContent = "Link copied.";
+  } catch {
+    shareStatus.textContent = "Copy failed — use the page URL after entering a sequence.";
+  }
+  window.setTimeout(() => { shareStatus.textContent = ""; }, 2200);
+});
 render();
