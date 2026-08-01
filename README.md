@@ -14,14 +14,15 @@ An interactive line-encoding visualizer for digital communications. Enter a bina
 ## Run locally
 
 ```sh
-npm install
-npm run dev
+nix develop
+bun install
+bun run dev
 ```
 
 Create a production bundle with:
 
 ```sh
-npm run build
+bun run build
 ```
 
 ## Encodings
