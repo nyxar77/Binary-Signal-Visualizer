@@ -5,19 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Binary Signal Visualizer</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body class="light-theme">
+  <body>
     <div class="container">
       <!-- Header -->
       <header class="header">
-        <h1>Binary Signal Visualizer</h1>
-        <button id="theme-toggle" class="btn-toggle">🌙 Dark Mode</button>
+        <div>
+          <p class="eyebrow">Digital communications lab</p>
+          <h1>Binary Signal Visualizer</h1>
+          <p class="subtitle">See every bit become a physical signal.</p>
+        </div>
+        <label class="theme-picker" for="theme-select">
+          <span>Palette</span>
+          <select id="theme-select" aria-label="Color palette">
+            <option value="system">Default · browser</option>
+            <option value="latte">Latte</option>
+            <option value="frappe">Frappé</option>
+            <option value="macchiato">Macchiato</option>
+            <option value="mocha">Mocha</option>
+          </select>
+        </label>
       </header>
 
       <!-- Input Section -->
-      <section class="input-section">
-        <label for="binary-input">Enter Binary Sequence:</label>
+      <section class="card input-section">
+        <label for="binary-input">Binary sequence</label>
         <input
           type="text"
           id="binary-input"
@@ -28,7 +40,7 @@
       </section>
 
       <!-- Encoding Selection -->
-      <section class="encoding-section">
+      <section class="card encoding-section">
         <h2>Select Encoding</h2>
         <div class="encoding-buttons" id="encoding-buttons">
           <button data-encoding="unipolar">Unipolar</button>
@@ -41,17 +53,17 @@
       </section>
 
       <!-- Legend -->
-      <section class="legend-section">
+      <section class="card legend-section">
         <h3>Legend</h3>
         <div id="legend">Select an encoding to see explanation.</div>
       </section>
 
       <!-- Chart -->
-      <section class="chart-section">
+      <section class="card chart-section">
         <canvas id="signal-chart"></canvas>
       </section>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
