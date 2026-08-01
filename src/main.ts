@@ -27,9 +27,8 @@ const shareStatus = document.querySelector<HTMLDivElement>("#share-status")!;
 const canvas = document.querySelector<HTMLCanvasElement>("#signal-chart")!;
 const conventionControl = document.querySelector<HTMLLabelElement>("#convention-control")!;
 const conventionSelect = document.querySelector<HTMLSelectElement>("#convention-select")!;
-const standardNote = document.querySelector<HTMLSpanElement>("#standard-note")!;
 
-if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !themeControl || !themeButton || !themePopover || !themeButtonLabel || !themeDot || !shareButton || !shareStatus || !conventionControl || !conventionSelect || !standardNote || !canvas) {
+if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !themeControl || !themeButton || !themePopover || !themeButtonLabel || !themeDot || !shareButton || !shareStatus || !conventionControl || !conventionSelect || !canvas) {
   throw new Error("Visualizer markup is incomplete.");
 }
 
@@ -152,10 +151,6 @@ const conventionOptions: Partial<Record<EncodingName, readonly (readonly [Conven
   manchester: [["thomas", "G.E. Thomas"], ["ieee8023", "IEEE 802.3"]],
   "differential-manchester": [["biphase-s", "Biphase-S · 0 transition"], ["biphase-m", "Biphase-M · 1 transition"]],
 };
-const fixedStandards: Partial<Record<EncodingName, string>> = {
-  b8zs: "ANSI T1 / North America",
-  hdb3: "ITU-T G.703 / E1",
-};
 let currentFlavour: ThemeName = "system";
 let currentAccent = "Mauve";
 
@@ -217,8 +212,7 @@ function renderAccentSwatches(accents: readonly (readonly [string, string])[]): 
 
 function renderConventionControl(): void {
   const options = conventionOptions[currentEncoding] ?? [];
-  conventionControl.hidden = options.length === 0;
-  standardNote.textContent = fixedStandards[currentEncoding] ?? "";
+  conventionControl.hidden = options.length < 2;
   conventionSelect.replaceChildren(...options.map(([value, label]) => {
     const option = document.createElement("option");
     option.value = value;
@@ -317,6 +311,9 @@ const url = new URL(window.location.href);
 const sharedEncoding = url.searchParams.get("encoding") as EncodingName | null;
 input.value = url.searchParams.get("bits") ?? "10101";
 if (sharedEncoding && sharedEncoding in encoders) currentEncoding = sharedEncoding;
+const sharedConvention = url.searchParams.get("convention") as ConventionName | null;
+const availableConventions = conventionOptions[currentEncoding] ?? [];
+if (sharedConvention && availableConventions.some(([value]) => value === sharedConvention)) currentConvention = sharedConvention;
 const savedTheme = JSON.parse(localStorage.getItem("binary-viz-theme") ?? "null") as { flavour?: ThemeName; accent?: string } | null;
 currentFlavour = savedTheme?.flavour ?? "system";
 currentAccent = savedTheme?.accent ?? "Mauve";
@@ -326,7 +323,9 @@ function saveTheme(): void {
 }
 shareButton.addEventListener("click", async () => {
   const shareUrl = new URL(window.location.href);
-  shareUrl.search = new URLSearchParams({ bits: input.value.trim(), encoding: currentEncoding }).toString();
+  const params = new URLSearchParams({ bits: input.value.trim(), encoding: currentEncoding });
+  if ((conventionOptions[currentEncoding] ?? []).length > 1) params.set("convention", currentConvention);
+  shareUrl.search = params.toString();
   try {
     await navigator.clipboard.writeText(shareUrl.toString());
     shareStatus.textContent = "Link copied.";
