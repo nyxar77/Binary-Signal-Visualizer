@@ -13,10 +13,12 @@ const input = document.querySelector<HTMLInputElement>("#binary-input")!;
 const error = document.querySelector<HTMLDivElement>("#input-error")!;
 const encodingButtons = document.querySelector<HTMLDivElement>("#encoding-buttons")!;
 const legend = document.querySelector<HTMLDivElement>("#legend")!;
-const themeSelect = document.querySelector<HTMLSelectElement>("#theme-select")!;
+const flavourButtons = document.querySelector<HTMLDivElement>("#flavour-buttons")!;
+const accentSwatches = document.querySelector<HTMLDivElement>("#accent-swatches")!;
+const activeTheme = document.querySelector<HTMLElement>("#active-theme")!;
 const canvas = document.querySelector<HTMLCanvasElement>("#signal-chart")!;
 
-if (!input || !error || !encodingButtons || !legend || !themeSelect || !canvas) {
+if (!input || !error || !encodingButtons || !legend || !flavourButtons || !accentSwatches || !activeTheme || !canvas) {
   throw new Error("Visualizer markup is incomplete.");
 }
 
@@ -108,6 +110,14 @@ const encoders: Record<EncodingName, (bits: string) => Level[]> = {
 let currentEncoding: EncodingName = "nrz-l";
 let chart: Chart | undefined;
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+const accents = [
+  ["Rosewater", "#f5e0e6"], ["Flamingo", "#f2cdcd"], ["Pink", "#f5c2e7"],
+  ["Mauve", "#cba6f7"], ["Red", "#f38ba8"], ["Peach", "#fab387"],
+  ["Yellow", "#f9e2af"], ["Green", "#a6e3a1"], ["Teal", "#94e2d5"],
+  ["Sky", "#89dceb"], ["Sapphire", "#74c7ec"], ["Blue", "#89b4fa"],
+] as const;
+let currentFlavour: ThemeName = "system";
+let currentAccent = "Mauve";
 
 const chartPlugin: Plugin<"line"> = {
   id: "bit-markers",
@@ -134,10 +144,20 @@ const chartPlugin: Plugin<"line"> = {
 };
 
 function theme(): void {
-  const selected = themeSelect.value as ThemeName;
-  document.body.dataset.theme = selected === "system"
+  const selected = currentFlavour;
+  const resolved = selected === "system"
     ? (prefersDark.matches ? "mocha" : "latte")
     : selected;
+  document.body.dataset.theme = resolved;
+  const accent = accents.find(([name]) => name === currentAccent)?.[1] ?? "#cba6f7";
+  document.body.style.setProperty("--accent", accent);
+  activeTheme.textContent = `${resolved[0].toUpperCase()}${resolved.slice(1)} · ${currentAccent}`;
+  flavourButtons.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.flavour === currentFlavour));
+  });
+  accentSwatches.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.accent === currentAccent);
+  });
 }
 
 function render(): void {
@@ -188,9 +208,29 @@ encodingButtons.addEventListener("click", (event) => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-encoding]");
   if (button) { currentEncoding = button.dataset.encoding as EncodingName; render(); }
 });
-themeSelect.addEventListener("change", render);
-prefersDark.addEventListener("change", () => { if (themeSelect.value === "system") render(); });
+flavourButtons.addEventListener("click", (event) => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-flavour]");
+  if (button) { currentFlavour = button.dataset.flavour as ThemeName; render(); saveTheme(); }
+});
+accentSwatches.addEventListener("click", (event) => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-accent]");
+  if (button) { currentAccent = button.dataset.accent ?? "Mauve"; render(); saveTheme(); }
+});
+prefersDark.addEventListener("change", () => { if (currentFlavour === "system") render(); });
 input.value = "10101";
-themeSelect.value = localStorage.getItem("binary-viz-theme") ?? "system";
-themeSelect.addEventListener("change", () => localStorage.setItem("binary-viz-theme", themeSelect.value));
+const savedTheme = JSON.parse(localStorage.getItem("binary-viz-theme") ?? "null") as { flavour?: ThemeName; accent?: string } | null;
+currentFlavour = savedTheme?.flavour ?? "system";
+currentAccent = savedTheme?.accent ?? "Mauve";
+accents.forEach(([name, color]) => {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.dataset.accent = name;
+  swatch.title = name;
+  swatch.setAttribute("aria-label", `${name} accent`);
+  swatch.style.setProperty("--swatch", color);
+  accentSwatches.append(swatch);
+});
+function saveTheme(): void {
+  localStorage.setItem("binary-viz-theme", JSON.stringify({ flavour: currentFlavour, accent: currentAccent }));
+}
 render();

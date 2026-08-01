@@ -15,17 +15,25 @@
           <h1>Binary Signal Visualizer</h1>
           <p class="subtitle">See every bit become a physical signal.</p>
         </div>
-        <label class="theme-picker" for="theme-select">
-          <span>Palette</span>
-          <select id="theme-select" aria-label="Color palette">
-            <option value="system">Default · browser</option>
-            <option value="latte">Latte</option>
-            <option value="frappe">Frappé</option>
-            <option value="macchiato">Macchiato</option>
-            <option value="mocha">Mocha</option>
-          </select>
-        </label>
       </header>
+
+      <section class="theme-card" aria-labelledby="theme-heading">
+        <div class="theme-card-header">
+          <div>
+            <h2 id="theme-heading">Visualizer theme</h2>
+            <p>Choose Default, a Catppuccin flavour, or an accent.</p>
+          </div>
+          <strong id="active-theme">Mocha · Mauve</strong>
+        </div>
+        <div class="flavour-buttons" id="flavour-buttons" aria-label="Theme flavour">
+          <button type="button" data-flavour="system" aria-pressed="false">Default</button>
+          <button type="button" data-flavour="latte" aria-pressed="false">Latte</button>
+          <button type="button" data-flavour="frappe" aria-pressed="false">Frappé</button>
+          <button type="button" data-flavour="macchiato" aria-pressed="false">Macchiato</button>
+          <button type="button" data-flavour="mocha" aria-pressed="false">Mocha</button>
+        </div>
+        <div class="accent-swatches" id="accent-swatches" aria-label="Theme accent"></div>
+      </section>
 
       <!-- Input Section -->
       <section class="card input-section">
