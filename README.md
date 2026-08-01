@@ -1,46 +1,36 @@
-# 📊 Binary Signal Visualizer
+# Binary Signal Visualizer
 
-> **Visualize how binary data becomes digital signals**  
-> A sleek, interactive tool for exploring line encoding techniques in digital communications.
+An interactive line-encoding visualizer for digital communications. Enter a binary sequence and inspect its Unipolar, NRZ-L, NRZ-I, Manchester, B8ZS, or HDB3 waveform.
 
-![Demo](image.png)
-![Demo](image2.png)
+## Features
 
+- TypeScript frontend with a reproducible Vite build.
+- Correct AMI substitutions for B8ZS and HDB3.
+- Catppuccin Latte, Frappé, Macchiato, and Mocha palettes.
+- `Default · browser` follows `prefers-color-scheme`: Latte for light mode and Mocha for dark mode.
+- Responsive waveform rendering with bit boundaries and signal levels.
+- Selected palette is saved locally.
 
+## Run locally
 
-## 🔧 Features
+```sh
+npm install
+npm run dev
+```
 
-- ✅ **6 Encoding Schemes**: NRZ-L, NRZ-I, Manchester, B8ZS, HDB3, Unipolar
-- 🎨 **Modern UI**: Glassmorphism, gradients, smooth animations, and **dark mode**
-- 📱 **Fully Responsive**: Works flawlessly on mobile, tablet, and desktop
-- 🖥️ **Real-Time Visualization**: Waveform updates instantly as you type
-- 🧠 **Educational Legend**: Clear explanation of each encoding method
-- 🚀 **Zero Dependencies**: Built with pure HTML, CSS, and JavaScript
-- 🔌 **No Setup Needed**: Runs directly in any browser — perfect for offline use
+Create a production bundle with:
 
----
-## 🚀 Quick Start
+```sh
+npm run build
+```
 
-### Option 1: Use Online
+## Encodings
 
-Simply open the [live demo](https://b17br34k3r.github.io/Binary-Signal-Visualizer/) in your browser and start using the tool immediately.
-
-### Option 2: Run Locally
-
-## 🎯 Supported Encodings
-
-| Encoding       | Use Case                    | Key Feature                                |
-| -------------- | --------------------------- | ------------------------------------------ |
-| **NRZ-L**      | Simple digital transmission | Level-based: 1 = low, 0 = high             |
-| **NRZ-I**      | Magnetic storage            | Transition on `1` only                     |
-| **Manchester** | Ethernet (IEEE 802.3)       | Mid-bit transition for clock sync          |
-| **Unipolar**   | Basic signaling             | `1` = high, `0` = zero                     |
-| **B8ZS**       | T1 lines (North America)    | Replaces 8 zeros with violation pattern    |
-| **HDB3**       | E1 lines (Europe)           | Replaces 4 zeros with balancing violations |
-
----
-
-## 🚀 Try It
-
-git clone https://github.com/b17br34k3r/Binary-Signal-Visualizer.git
-open index.html
+| Encoding | Rule |
+| --- | --- |
+| Unipolar | `1` is +V; `0` is 0V |
+| NRZ-L | `1` is −V; `0` is +V |
+| NRZ-I | `1` changes the level; `0` holds it |
+| Manchester | Every bit transitions at mid-bit |
+| B8ZS | Replaces eight zeroes with `000VB0VB` |
+| HDB3 | Replaces four zeroes with `000V` or `B00V` |
