@@ -9,6 +9,7 @@ type EncodingName = "unipolar" | "unipolar-rz" | "nrz-l" | "nrz-i" | "polar-rz" 
 type ThemeName = "system" | "latte" | "frappe" | "macchiato" | "mocha";
 type Level = -1 | 0 | 1;
 type ConventionName = "thomas" | "ieee8023" | "biphase-s" | "biphase-m";
+type SignalPoint = { x: number; y: Level };
 
 const input = document.querySelector<HTMLInputElement>("#binary-input")!;
 const error = document.querySelector<HTMLDivElement>("#input-error")!;
@@ -160,18 +161,17 @@ const chartPlugin: Plugin<"line"> = {
     const bits = input.value.trim();
     if (!bits || !currentChart.chartArea) return;
     const { ctx, chartArea, scales } = currentChart;
-    const width = chartArea.right - chartArea.left;
     ctx.save();
     ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--grid");
     ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--muted");
     ctx.font = "600 12px system-ui";
     ctx.textAlign = "center";
     for (let index = 0; index <= bits.length; index += 1) {
-      const x = chartArea.left + (width * index) / bits.length;
+      const x = scales.x.getPixelForValue(index);
       ctx.beginPath(); ctx.moveTo(x, chartArea.top); ctx.lineTo(x, chartArea.bottom); ctx.stroke();
     }
     for (let index = 0; index < bits.length; index += 1) {
-      const x = chartArea.left + (width * (index + 0.5)) / bits.length;
+      const x = scales.x.getPixelForValue(index + 0.5);
       ctx.fillText(bits[index], x, scales.y.getPixelForValue(1.22));
     }
     ctx.restore();
@@ -213,6 +213,8 @@ function renderAccentSwatches(accents: readonly (readonly [string, string])[]): 
 function renderConventionControl(): void {
   const options = conventionOptions[currentEncoding] ?? [];
   conventionControl.hidden = options.length < 2;
+  if (options.length < 2) return;
+  if (!options.some(([value]) => value === currentConvention)) currentConvention = options[0][0];
   conventionSelect.replaceChildren(...options.map(([value, label]) => {
     const option = document.createElement("option");
     option.value = value;
@@ -221,6 +223,7 @@ function renderConventionControl(): void {
     return option;
   }));
   conventionSelect.value = currentConvention;
+  conventionSelect.setAttribute("aria-label", `Convention, ${options.find(([value]) => value === currentConvention)?.[1] ?? "selected"}`);
 }
 
 function render(): void {
@@ -239,19 +242,22 @@ function render(): void {
 
   chart?.destroy();
   const styles = getComputedStyle(document.body);
-  const dataset: ChartDataset<"line", number[]> = {
+  const levels = encoders[currentEncoding](bits);
+  const data: SignalPoint[] = levels.map((y, index) => ({ x: index / 2, y }));
+  data.push({ x: bits.length, y: levels[levels.length - 1] });
+  const dataset: ChartDataset<"line", SignalPoint[]> = {
     label: "Signal",
-    data: encoders[currentEncoding](bits),
+    data,
     borderColor: styles.getPropertyValue("--accent").trim(),
     backgroundColor: styles.getPropertyValue("--accent-soft").trim(),
     borderWidth: 3,
     pointRadius: 0,
-    stepped: true,
+    stepped: "after",
     fill: true,
   };
-  const config: ChartConfiguration<"line", number[]> = {
+  const config: ChartConfiguration<"line", SignalPoint[]> = {
     type: "line",
-    data: { labels: dataset.data.map(() => ""), datasets: [dataset] },
+    data: { datasets: [dataset] },
     plugins: [chartPlugin],
     options: {
       responsive: true,
@@ -259,7 +265,7 @@ function render(): void {
       animation: { duration: 220 },
       scales: {
         y: { min: -1.5, max: 1.5, ticks: { stepSize: 1, color: styles.getPropertyValue("--muted"), callback: (value: string | number) => value === 1 ? "+V" : value === -1 ? "−V" : "0" }, grid: { color: styles.getPropertyValue("--grid") } },
-        x: { ticks: { display: false }, grid: { display: false } },
+        x: { type: "linear", min: 0, max: bits.length, ticks: { display: false }, grid: { display: false } },
       },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
     },
